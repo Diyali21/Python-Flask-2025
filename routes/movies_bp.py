@@ -1,6 +1,5 @@
-from flask import Flask, render_template
-
-app = Flask(__name__)
+# step 3
+from flask import Blueprint, request
 
 movies = [
     {
@@ -93,30 +92,61 @@ movies = [
     },
 ]
 
-
-# API / Endpoint
-# 1.
-@app.get("/")
-def hello_world():
-    return "<h1>Super, Cool 😁</h1>"
+movies_bp = Blueprint("movies_bp", __name__)  # step 1
 
 
-name = "Ultraviolet"
-hobbies = ["Gaming", "Reading", "Soccer", "Ballet", "Gyming", "Yoga"]
+# step 2 - change to movies_bp
+# 2.
+@movies_bp.get("/")
+def get_all_movies():
+    return movies
 
 
-# Flask use Jinja2 -> Replace {{}} with python value
-@app.get("/about")
-def about_page():
-    return render_template("about.html", name=name, hobbies=hobbies)
+HTTP_NOT_FOUND = 404
 
 
-# step 4
-# Flask - Blueprints
-from routes.movies_bp import movies_bp
+# 3.
+@movies_bp.get("/<id>")
+def get_movie_by_id(id):
+    for movie in movies:
+        if movie["id"] == id:
+            return movie
+    return {"message": "Movie not found"}, HTTP_NOT_FOUND
 
-app.register_blueprint(movies_bp, url_prefix="/movies")
 
-# Don't have to restart manually - type in terminal python ./main.py
-if __name__ == "__main__":
-    app.run(debug=True)
+# Delete
+@movies_bp.delete("/<id>")
+def delete_movie_by_id(id):
+    for movie in movies:
+        if movie["id"] == id:
+            movies.remove(movie)
+            return {"message": f"{id} Deleted successfully", "data": movie}
+    return {"message": "Movie not found"}, 404
+
+
+# Insert
+@movies_bp.post("/")
+def create_movie():
+    new_movie = request.get_json()
+
+    print(new_movie)
+
+    id_list = [int(movie["id"]) for movie in movies]
+
+    new_movie["id"] = str(max(id_list) + 1)
+
+    movies.append(new_movie)
+
+    return {"message": "Movie created successfully", "data": new_movie}
+
+
+# Update
+@movies_bp.put("/<id>")
+def update_movie_by_id(id):
+    body = request.get_json()
+
+    for movie in movies:
+        if movie["id"] == id:
+            movie.update(body)
+            return {"message": "Movie updated successfully", "data": movie}
+    return {"message": "Movie not found"}, HTTP_NOT_FOUND
