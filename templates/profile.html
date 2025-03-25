@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .profile_pic {
+        height: 300px;
+        weight: 300px;
+        border-radius: 50%;
+        aspect-ratio: 1 / 1;
+      }
+      body {
+        display: grid;
+        place-content: center;
+        min-height: 100vh;
+        margin: 0px;
+      }
+
+      .name {
+        font-weight: 1000;
+        font-style: italic;
+        font-family: sans-serif;
+      }
+      h1 {
+        font-weight: 200;
+      }
+
+      .user-container {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    {% for info in data %}
+    <div class="user-container">
+      <img class="profile_pic" src="{{info.pic}}" alt="" />
+      <h1>Hello, <span class="name">{{info.name}}</span> 🎉🎉</h1>
+    </div>
+    {% endfor %}
+  </body>
+</html>
