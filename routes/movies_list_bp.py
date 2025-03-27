@@ -1,16 +1,9 @@
 from pprint import pprint
 
-from flask import Blueprint, request
+from flask import Blueprint, render_template, request
 
+# Task 3 - Create movie-list page
 movies = [
-    {
-        "name": "Thor: Ragnarok",
-        "poster": "https://m.media-amazon.com/images/M/MV5BMjMyNDkzMzI1OF5BMl5BanBnXkFtZTgwODcxODg5MjI@._V1_.jpg",
-        "summary": "When Earth becomes uninhabitable in the future, a farmer and ex-NASA\\n pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team\\n of researchers, to find a new planet for humans.",
-        "rating": 8.8,
-        "trailer": "https://youtu.be/NgsQ8mVkN8w",
-        "id": "109",
-    },
     {
         "id": "99",
         "name": "Vikram",
@@ -22,7 +15,7 @@ movies = [
     {
         "id": "100",
         "name": "RRR",
-        "poster": "https://englishtribuneimages.blob.core.windows.net/gallary-content/2021/6/Desk/2021_6$largeimg_977224513.JPG",
+        "poster": "https://image.tmdb.org/t/p/original/kdO4JtO5DnIMyLymQv8C8Ol1CzA.jpg",
         "rating": 8.8,
         "summary": "RRR is an upcoming Indian Telugu-language period action drama film directed by S. S. Rajamouli, and produced by D. V. V. Danayya of DVV Entertainments.",
         "trailer": "https://www.youtube.com/embed/f_vbAtFSEc0",
@@ -85,65 +78,40 @@ movies = [
     },
     {
         "name": "PS2",
-        "poster": "https://m.media-amazon.com/images/M/MV5BYjFjMTQzY2EtZjQ5MC00NGUyLWJiYWMtZDI3MTQ1MGU4OGY2XkEyXkFqcGdeQXVyNDExMjcyMzA@._V1_.jpg",
+        "poster": "https://resizing.flixster.com/bykwdBFKjGapfGZZ9cLdQjQsEoQ=/ems.cHJkLWVtcy1hc3NldHMvbW92aWVzLzFiYjc4OGQzLWM3NWMtNDY4ZS1iOTYxLWY3Y2RlMGFmNjM3OC5qcGc=",
         "summary": "Ponniyin Selvan: I is an upcoming Indian Tamil-language epic period action film directed by Mani Ratnam, who co-wrote it with Elango Kumaravel and B. Jeyamohan",
         "rating": 8,
         "trailer": "https://www.youtube.com/embed/KsH2LA8pCjo",
         "id": "108",
     },
+    {
+        "name": "Thor: Ragnarok",
+        "poster": "https://m.media-amazon.com/images/M/MV5BMjMyNDkzMzI1OF5BMl5BanBnXkFtZTgwODcxODg5MjI@._V1_.jpg",
+        "summary": "When Earth becomes uninhabitable in the future, a farmer and ex-NASA\\n pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team\\n of researchers, to find a new planet for humans.",
+        "rating": 8.8,
+        "trailer": "https://youtu.be/NgsQ8mVkN8w",
+        "id": "109",
+    },
 ]
+
 
 HTTP_NOT_FOUND = 404
 
 # 1. Organize
 # 2. app needs to be in main.py
-movies_bp = Blueprint("movies_bp", __name__)
+movies_list_bp = Blueprint("movies_list_bp", __name__)
 
 
 # /movies -> movies
-@movies_bp.get("/")
-def get_all_movies():
-    # Auto converts data -> JSON (Flask)
-    return movies
+@movies_list_bp.get("/")
+def movie_list_page():
+    return render_template("movie-list.html", movies=movies)
 
 
 # /movies/100 - <id> -> Variable
-@movies_bp.get("/<id>")
-def get_movie_by_id(id):
-    # Auto converts data -> JSON (Flask)
+@movies_list_bp.get("/<id>")
+def movie_details_page(id):
     for movie in movies:
         if movie["id"] == id:
-            return movie
-    return {"message": "Movie not found"}, HTTP_NOT_FOUND
-
-
-# /movies/100 - <id> -> Variable
-@movies_bp.delete("/<id>")
-def delete_movie_by_id(id):  # log
-    # Auto converts data -> JSON (Flask)
-    for movie in movies:
-        if movie["id"] == id:
-            movies.remove(movie)
-            return {"message": "Movie deleted successfully", "data": movie}
-    return {"message": "Movie not found"}, HTTP_NOT_FOUND
-
-
-@movies_bp.post("/")  # HOF
-def create_movie():
-    new_movie = request.get_json()  # body
-    ids = [int(movie["id"]) for movie in movies]  # List of ids
-    new_movie["id"] = str(max(ids) + 1)  # max + 1
-    movies.append(new_movie)
-    return {"message": "Movie created successfully", "data": new_movie}
-
-
-# GET + POST
-# /movies/100 - <id> -> Variable
-@movies_bp.put("/<id>")
-def update_movie_by_id(id):
-    update_movie = request.get_json()  # body
-    for movie in movies:
-        if movie["id"] == id:
-            movie.update(update_movie)
-            return {"message": "Movie updated successfully", "data": movie}
-    return {"message": "Movie not found"}, HTTP_NOT_FOUND
+            return render_template("movie-details.html", movie=movie)
+    return render_template("not-found.html"), 404
