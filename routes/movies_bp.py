@@ -148,11 +148,15 @@ def delete_movie_by_id(id):  # log
     if not movie:
         return {"message": "Movie not found"}, HTTP_NOT_FOUND
 
-    data = movie.to_dict()
-    db.session.delete(movie)
+    try:
+        data = movie.to_dict()
+        db.session.delete(movie)
 
-    db.session.commit()  # Making the change (Update/Delete/Create)
-    return {"message": "Movie deleted successfully", "data": data}
+        db.session.commit()  # Making the change (Update/Delete/Create)
+        return {"message": "Movie deleted successfully", "data": data}
+    except Exception as e:
+        db.session.rollback()
+        return {"message": str(e)}, 500
 
     # for movie in movies:
     #     if movie["id"] == id:
