@@ -2,6 +2,9 @@ from pprint import pprint
 
 from flask import Blueprint, request
 
+from extensions import db
+from models.movie import Movie
+
 movies = [
     {
         "name": "Thor: Ragnarok",
@@ -100,6 +103,25 @@ HTTP_NOT_FOUND = 404
 movies_bp = Blueprint("movies_bp", __name__)
 
 
+@movies_bp.get("/")
+def get_movies():
+    movies = Movie.query.all()
+
+    movies_dict = [movie.to_dict() for movie in movies]
+    return movies_dict
+
+
+@movies_bp.get("/<id>")
+def get_movie_by_id(id):
+    movie = Movie.query.get(id)
+    if not movie:
+        return {"message": "Movie not found"}, HTTP_NOT_FOUND
+
+    data = movie.to_dict()
+
+    return data
+
+
 # /movies -> movies
 @movies_bp.get("/")
 def get_all_movies():
@@ -108,24 +130,35 @@ def get_all_movies():
 
 
 # /movies/100 - <id> -> Variable
-@movies_bp.get("/<id>")
-def get_movie_by_id(id):
-    # Auto converts data -> JSON (Flask)
-    for movie in movies:
-        if movie["id"] == id:
-            return movie
-    return {"message": "Movie not found"}, HTTP_NOT_FOUND
+# @movies_bp.get("/<id>")
+# def get_movie_by_id(id):
+#     # Auto converts data -> JSON (Flask)
+#     for movie in movies:
+#         if movie["id"] == id:
+#             return movie
+#     return {"message": "Movie not found"}, HTTP_NOT_FOUND
 
 
 # /movies/100 - <id> -> Variable
 @movies_bp.delete("/<id>")
 def delete_movie_by_id(id):  # log
     # Auto converts data -> JSON (Flask)
-    for movie in movies:
-        if movie["id"] == id:
-            movies.remove(movie)
-            return {"message": "Movie deleted successfully", "data": movie}
-    return {"message": "Movie not found"}, HTTP_NOT_FOUND
+
+    movie = Movie.query.get(id)
+    if not movie:
+        return {"message": "Movie not found"}, HTTP_NOT_FOUND
+
+    data = movie.to_dict()
+    db.session.delete(movie)
+
+    db.session.commit()  # Making the change (Update/Delete/Create)
+    return {"message": "Movie deleted successfully", "data": data}
+
+    # for movie in movies:
+    #     if movie["id"] == id:
+    #         movies.remove(movie)
+    #         return {"message": "Movie deleted successfully", "data": movie}
+    # return {"message": "Movie not found"}, HTTP_NOT_FOUND
 
 
 @movies_bp.post("/")  # HOF

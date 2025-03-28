@@ -1,5 +1,14 @@
+from os import environ
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+print(environ.get("LOCAL_DATABASE_URL"))
+
+
 class Config:
     # General pattern
     # mssql+pyodbc://@<server_name>/<db_name>?driver=<driver_name>
-    SQLALCHEMY_DATABASE_URI = "mssql+pyodbc://@PF463819\SQLEXPRESS/SanlamMovieDB2025?driver=ODBC+Driver+17+for+SQL+Server"
+    SQLALCHEMY_DATABASE_URI = environ.get("LOCAL_DATABASE_URL")
     SQL_ALCHEMY_TRACK_MODIFICATIONS = False
