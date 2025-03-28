@@ -167,11 +167,30 @@ def delete_movie_by_id(id):  # log
 
 @movies_bp.post("/")  # HOF
 def create_movie():
-    new_movie = request.get_json()  # body
-    ids = [int(movie["id"]) for movie in movies]  # List of ids
-    new_movie["id"] = str(max(ids) + 1)  # max + 1
-    movies.append(new_movie)
-    return {"message": "Movie created successfully", "data": new_movie}
+    data = request.get_json()  # body
+    new_movie = Movie(
+        name=data["name"],
+        poster=data["poster"],
+        rating=data["rating"],
+        summary=data["summary"],
+        trailer=data["trailer"],
+    )
+
+    try:
+        # print(new_movie, new_movie.to_dict())
+        db.session.add(new_movie)
+        db.session.commit()
+        return {
+            "message": "Movie created successfully",
+            "data": new_movie.to_dict(),
+        }, 201
+    except Exception as e:
+        db.session.rollback()
+        return {"message": str(e)}, 500
+    # ids = [int(movie["id"]) for movie in movies]  # List of ids
+    # new_movie["id"] = str(max(ids) + 1)  # max + 1
+    # movies.append(new_movie)
+    # return {"message": "Movie created successfully", "data": new_movie}
 
 
 # GET + POST
@@ -179,6 +198,7 @@ def create_movie():
 @movies_bp.put("/<id>")
 def update_movie_by_id(id):
     update_movie = request.get_json()  # body
+
     for movie in movies:
         if movie["id"] == id:
             movie.update(update_movie)
