@@ -96,6 +96,8 @@ movies = [
     },
 ]
 
+STATUS_CODE = {"CREATED": 201, "NOT FOUND": 404, "SERVER ERROR": 500}
+
 HTTP_NOT_FOUND = 404
 
 # 1. Organize
@@ -115,7 +117,7 @@ def get_movies():
 def get_movie_by_id(id):
     movie = Movie.query.get(id)
     if not movie:
-        return {"message": "Movie not found"}, HTTP_NOT_FOUND
+        return {"message": "Movie not found"}, STATUS_CODE["NOT FOUND"]
 
     data = movie.to_dict()
 
@@ -146,7 +148,7 @@ def delete_movie_by_id(id):  # log
 
     movie = Movie.query.get(id)
     if not movie:
-        return {"message": "Movie not found"}, HTTP_NOT_FOUND
+        return {"message": "Movie not found"}, STATUS_CODE["NOT FOUND"]
 
     try:
         data = movie.to_dict()
@@ -168,14 +170,16 @@ def delete_movie_by_id(id):  # log
 @movies_bp.post("/")  # HOF
 def create_movie():
     data = request.get_json()  # body
-    new_movie = Movie(
-        name=data["name"],
-        poster=data["poster"],
-        rating=data["rating"],
-        summary=data["summary"],
-        trailer=data["trailer"],
-    )
+    # data["name"] -> Comes from Postman
+    # new_movie = Movie(
+    #     name=data["name"],
+    #     poster=data["poster"],
+    #     rating=data["rating"],
+    #     summary=data["summary"],
+    #     trailer=data["trailer"],
+    # )
 
+    new_movie = Movie(**data)
     try:
         # print(new_movie, new_movie.to_dict())
         db.session.add(new_movie)
@@ -203,4 +207,4 @@ def update_movie_by_id(id):
         if movie["id"] == id:
             movie.update(update_movie)
             return {"message": "Movie updated successfully", "data": movie}
-    return {"message": "Movie not found"}, HTTP_NOT_FOUND
+    return {"message": "Movie not found"}, STATUS_CODE["NOT FOUND"]
