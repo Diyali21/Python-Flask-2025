@@ -1,6 +1,7 @@
 from pprint import pprint
 
 from flask import Blueprint, redirect, render_template, request, url_for
+from flask_login import login_required
 
 from contstants import STATUS_CODE
 from extensions import db
@@ -14,6 +15,7 @@ movies_list_bp = Blueprint("movies_list_bp", __name__)
 # Fullstack Developer
 # /movies -> movies
 @movies_list_bp.get("/")
+@login_required
 def movie_list_page():
     movies = Movie.query.all()  # Select * from movies
     movies_dict = [movie.to_dict() for movie in movies]

@@ -4,6 +4,7 @@ from sqlalchemy.sql import text
 
 from config import Config
 from extensions import db
+from models.movie import Movie
 from models.user import User
 from routes.auth_bp import auth_bp
 from routes.main_bp import main_bp
@@ -19,18 +20,17 @@ def create_app():
     db.init_app(app)
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_view = "auth_bp.login_page"  # Redirects unauthorized user
+    login_manager.login_view = (
+        "auth_bp.login_page"  # Redirects unauthorized users to the login page
+    )
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(user_id)  # Maintain tokens for specific users
+        return User.query.get(user_id)  # Maintain tokens for specific user
 
     with app.app_context():
         try:
             result = db.session.execute(text("SELECT 1")).fetchall()
-            # print(Movie.query.all())
-            # movies = Movie.query.all()
-            # print(movies[0].to_dict())
             print("Connection successful:", result)
         except Exception as e:
             print("Error connecting to the database:", e)
@@ -39,7 +39,7 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(movies_bp, url_prefix="/movies")  # Refactor - Mailability ⬆️
     app.register_blueprint(movies_list_bp, url_prefix="/movie-list")
-    app.register_blueprint(auth_bp)
+    app.register_blueprint(auth_bp)  # 1
 
     return app
 

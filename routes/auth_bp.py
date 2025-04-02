@@ -1,6 +1,7 @@
 from pprint import pprint
 
 from flask import Blueprint, redirect, render_template, request, url_for
+from flask_login import login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db
@@ -39,6 +40,9 @@ def submit_login_page():
         if not check_password_hash(user_from_db.password, password):
             raise ValueError("Credentials are invalid")
 
+        login_user(
+            user_from_db
+        )  # Create token & Store in cookies for that particular user
         return redirect(url_for("movies_list_bp.movie_list_page"))
 
     except Exception as e:
@@ -78,9 +82,15 @@ def submit_signup_page():
         new_user = User(**data)
         db.session.add(new_user)
         db.session.commit()
-        # Todo: Take them to login page
+
         return redirect(url_for("auth_bp.login_page"))
     except Exception as e:
         print(e)
         db.session.rollback()
         return redirect(url_for("auth_bp.submit_signup_page"))
+
+
+@auth_bp.get("/logout")
+def logout_page():
+    logout_user()
+    return redirect(url_for("auth_bp.submit_login_page"))
