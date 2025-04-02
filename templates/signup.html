@@ -1,0 +1,50 @@
+{% extends "base.html" %} {% block head_content %}
+<style>
+  .form-element {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 500px;
+  }
+  body {
+    padding: 20px;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<!-- BP.FN -->
+<form
+  action="{{url_for('auth_bp.submit_signup_page')}}"
+  method="POST"
+  class="form-container"
+>
+  <div class="form-element">
+    <label for="username">Username</label>
+    <input
+      type="text"
+      placeholder="JohnDoe"
+      id="username"
+      required
+      name="username"
+    />
+  </div>
+  <div class="form-element">
+    <label for="password">Password</label>
+    <input type="password" id="password" required name="password" />
+  </div>
+  <div class="form-element">
+    <label for="confirm">Confirm Password</label>
+    <input type="password" id="confirm" required name="confirm" />
+  </div>
+
+  {% if password == confirm %}
+  <button type="submit">Sign Up</button>
+  {% endif %}
+</form>
+
+{% endblock %}

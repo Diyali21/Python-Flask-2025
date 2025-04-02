@@ -1,6 +1,5 @@
 from pprint import pprint
 
-from constants import STATUS_CODE
 from flask import Blueprint, request
 
 from extensions import db
