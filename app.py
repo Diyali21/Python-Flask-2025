@@ -1,8 +1,10 @@
 from flask import Flask, render_template
+from flask_login import LoginManager
 from sqlalchemy.sql import text
 
 from config import Config
 from extensions import db
+from models.user import User
 from routes.auth_bp import auth_bp
 from routes.main_bp import main_bp
 from routes.movies_bp import movies_bp
@@ -15,6 +17,13 @@ def create_app():
 
     # Initialize the DB
     db.init_app(app)
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.login_view = "auth_bp.login_page"  # Redirects unauthorized user
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(user_id)  # Maintain tokens for specific users
 
     with app.app_context():
         try:
